@@ -1,11 +1,13 @@
 div(ng-cintroller='HeaderController')
   div(ng-if='auth.user')
-    h2 Hello 
+    h2 If
+    h2 Hello #{'auth.user.username'}
       span(ng-bind='auth.user.username')  
     div
       form(name='logout', method='post', action='/logout')
         input(type='submit', value='Log out')
   div(ng-if='!auth.user')
+    h2 Not if
     div
       a(ui-sref='signup') Sign up
     div

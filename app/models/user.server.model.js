@@ -40,11 +40,11 @@ var UserSchema  = new Schema({
       */
   },
 
-/*
+
   salt:{ //ใช้ทำ password hash
     type: String
   },
-*/
+
   provider:{ //strategy ที่ user ลงทะเบียน
     type: String,
     required:'Provider is required'
@@ -60,62 +60,54 @@ UserSchema.pre('save', function(next) {
     if (this.password) {
         //this.password = this.saltHashPassword(this.password);
         //console.log(this.password);
-        this.salt = this.genRandomString(16);
-        this.password = this.saltHashPassword(this.password);
+        this.salt = crypto.randomBytes(Math.ceil(16/2))
+                .toString('hex') /** convert to hexadecimal format */
+                .slice(0,16);
+        this.password = this.sha512(this.password);
 
         console.log('Salt pre save = '+  this.salt);
-        console.log('password = '+this.password);
+        console.log('password pre save = '+this.password);
     }
     next();
 });
 
-UserSchema.methods.genRandomString = function(length){
-    this.salt = new Buffer(crypto.randomBytes(Math.ceil(length/2))
-            .toString('hex') /** convert to hexadecimal format */
-            .slice(0,length), 'base64');   /** return required number of characters */
-    return this.salt;
-};
+// UserSchema.methods.genRandomString = function(length){
+//     this.salt = new Buffer(crypto.randomBytes(Math.ceil(length/2))
+//             .toString('hex') /** convert to hexadecimal format */
+//             .slice(0,length), 'base64');   /** return required number of characters */
+//
+//     return this.salt;
+// };
 
-UserSchema.methods.sha512 = function(password, salt){
-    var hash = crypto.createHmac('sha512', salt); /** Hashing algorithm sha512 */
+UserSchema.methods.sha512 = function(password){
+    var hash = crypto.createHmac('sha512', this.salt); /** Hashing algorithm sha512 */
     hash.update(password);
     var value = hash.digest('hex');
-    return {
-        salt:salt,
-        passwordHash:value
-    };
+    // return {
+    //     salt:salt,
+    //     passwordHash:value
+    // };
+    return value;
 };
 
+// UserSchema.methods.saltHashPassword = function(password){
+//     //this.salt = this.genRandomString(16); /** Gives us salt of length 16 */
+//     passwordData = this.sha512(password, this.salt);
 //
-// function saltHashPassword(userpassword) {
-//     var salt = genRandomString(16); /** Gives us salt of length 16 */
-//     var passwordData = sha512(userpassword, salt);
-//     console.log('UserPassword = '+userpassword);
-//     console.log('Passwordhash = '+passwordData.passwordHash);
-//     console.log('nSalt = '+passwordData.salt);
+//     //console.log('UserPassword = '+password);
+//     //console.log('salt === '+this.salt);
+//     ///console.log('Passwordhash = '+passwordData.passwordHash);
+//
 //     return passwordData.passwordHash;
 // }
 
-UserSchema.methods.saltHashPassword = function(password){
-    //this.salt = this.genRandomString(16); /** Gives us salt of length 16 */
-    passwordData = this.sha512(password, this.salt);
-
-    console.log('UserPassword = '+password);
-    console.log('salt === '+this.salt);
-    console.log('Passwordhash = '+passwordData.passwordHash);
-
-    return passwordData.passwordHash;
-}
-
 UserSchema.methods.authenticate =  function(password) {
- // this.findOne({username:'yyyyy'}, function(error, user) {
- //   console.log(user);
- //     return -1;
- // });
+  /*
     console.log('password in DB = '+ this.password);
     console.log('password for user = '+password);
-    console.log('password for user + hash ='+this.saltHashPassword(password));
-  //  return this.password === this.saltHashPassword(password);
+    console.log('password for user + hash ='+this.sha512(password));
+  */
+    return this.password === this.sha512(password);
 };
 
 /*
@@ -124,33 +116,22 @@ UserSchema.pre('save', function(next){
   if(this.password){
     this.salt = new Buffer(crypto.randomBytes(16).toString('base64'), 'base64');
     this.password = this.hashPassword(this.password);
+    console.log('salt = '+this.salt);
+    console.log('password = '+this.password);
   }
   next;
 });
 
 //สร้าง method ให้กับ model instance
 UserSchema.methods.hashPassword = function(password){
-console.log("pbkdf2Sync");
   return crypto.pbkdf2Sync(password, this.salt, 1000000, 64, 'sha1').toString('base64');
   //console.log(crypto.pbkdf2Sync(password, this.salt, 10000, 64, 'sha1').toString('base64'));
 };
-*/
-
-/*
 
 UserSchema.methods.authenticate = function(password){
-    console.log('pass = '+ this.password);
-    console.log('hash pass = ');
-    //เช็ค password ในฟิว กับในฟอร์ม ตรงกันไหม
-    function(err,data){
-             if(err){
-             console.log(err);
-             }
-            console.log(data);
-    //return this.password === ;
+    return this.password === this.hashPassword(password);
 }
 */
-
 
 /*
 var mongoose = require('mongoose');
@@ -171,6 +152,7 @@ user.findOne({username:this.username},function(err,data){
 
 */
 //สร้าง OAuth User
+
 UserSchema.statics.findUniqueUsername = function(username, suffix, callback){
   var _this = this;
   var possibleUsername = username + (suffix || '');

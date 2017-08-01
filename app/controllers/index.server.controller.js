@@ -15,7 +15,7 @@ exports.render = function(req, res){
 	  title: 'Hello World',
 		//message: 'How are things'
 		username: req.user ? req.user.username : '' //ฝั่ง server
-		//แปลงเป็น json string ก่อน
+		//ทำงานฝั่ง angular แปลงเป็น json string ก่อน
 		//user: JSON.stringify(req.user)
 	});
 };
