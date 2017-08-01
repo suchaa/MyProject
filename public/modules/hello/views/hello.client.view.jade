@@ -1,0 +1,7 @@
+div(ng-controller='NameController')
+  div
+    label(for='yourName') Your name is
+    input(name='yourName', type="text", ng-model='yourName')
+  div
+    | {{ yourName | sayhello }}
+  a(ui-sref='nohello') Go to nohello state

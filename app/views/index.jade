@@ -1,0 +1,58 @@
+doctype html
+html
+	head
+		title= title
+		link(href='/css/main.css', rel='stylesheet')
+	body#mainApp
+		//-header(ng-include="'/modules/core/views/header.client.view.jade'")
+		if username
+			h2 Hello #{username}
+			div
+				form(name='logout', method='post', action='/logout')
+					input(type='submit', value='Log out')
+		else
+			div
+				a(ui-sref='signup') Sign up
+			div
+				a(ui-sref='login') Log in
+		
+		//- div(ng-app='Hello')
+		//- 	| {{ 'World' | sayhello }}
+		
+		//-div(ng-app='Hello', ng-controller='NameController')
+		//- div#mainApp(ng-controller='NameController', ng-strict-di)
+		//- 	div
+		//- 		label(for='yourName') Your name is
+		//- 		input(name='yourName', type="text", ng-model='yourName')
+		//- 	div
+		//- 		| {{ yourName | sayhello }}
+		
+		//- ng-include มันจะ include บางส่วนของ view นั้น view เดียวมาแสดง
+		//-div#mainApp(ng-include="'/modules/hello/views/hello.client.view.jade'")
+		
+	
+		//-ui-view สามารถเปลี่ยน state ได้ สามารถเปลี่ยน view ได้
+		div(ui-view)
+
+		script(type="text/javascript").
+			window.user = !{user || 'null'}
+		script(type='text/javascript', src='/lib/angular/angular.min.js')
+		//- เอาไว้หลัง angular.min.js แต่เอาไว้ก่อนโมดูลอื่น
+		script(type="text/javascript", src="/lib/angular-ui-router/release/angular-ui-router.min.js")
+		//- ประกาศไว้หลัง angular แต่เอาไว้ก่อน app หลัก
+		
+		//-ใส่เครื่องหมาย # หลัง /
+		script(type="text/javascript", src="/modules/core/core.client.module.js")
+		script(type="text/javascript", src="/modules/core/config/core.client.routes.js")
+		//-script(type="text/javascript", src="/modules/core/controllers/header.client.controller.js")
+		
+		script(type="text/javascript", src="/modules/users/users.client.module.js")
+		script(type="text/javascript", src="/modules/users/config/users.client.routes.js")
+		script(type="text/javascript", src="/modules/users/controllers/auth.client.controller.js")
+		//-script(type="text/javascript", src="/modules/users/services/auth.client.service.js")
+		
+		script(type="text/javascript", src="/modules/hello/hello.client.module.js") 
+		script(type="text/javascript", src="/modules/hello/config/hello.client.routes.js")
+		script(type="text/javascript", src="/modules/hello/controllers/hello.client.controller.js")
+		script(type="text/javascript", src="/modules/hello/filters/hello.client.filter.js")
+		script(type="text/javascript", src='/application.js')
